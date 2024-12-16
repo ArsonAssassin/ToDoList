@@ -1,5 +1,8 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.SqlServer;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -22,6 +25,8 @@ namespace ToDoList.Api
 
         private static void ConfigureServices(HostBuilderContext context, IServiceCollection services)
         {
+            services.AddDbContext<TodoDbContext>(options => options.UseSqlServer(context.Configuration.GetConnectionString("TodoConnectionString")));
+
             services.AddSingleton<ITodoRepository, TodoRepository>();
         }
     }
