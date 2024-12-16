@@ -12,7 +12,7 @@ A .NET 8 Azure Functions API for managing todo items. Built using isolated worke
    ```
  - Apply database migrations by running the command "dotnet ef database update"
  - Run the project  
-The api will be hosted on your local machine, with documentation at <host>:<port>/api/swagger/ui.
+The api will be hosted on your local machine, with documentation at \<host\>:\<port\>/api/swagger/ui.
 
 ## Endpoints
  - POST /api/todo - Create a todo item
