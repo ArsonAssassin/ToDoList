@@ -15,8 +15,9 @@ namespace ToDoList.Api.Services.OpenApi
             Version = "1.0.0",
             Description = @"
                 This API serves data for managing Todo Lists as a backend for TodoListUI.
-            "           
-        };
+            "
+           
+        };        
 
     }
 }
