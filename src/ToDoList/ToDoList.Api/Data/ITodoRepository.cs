@@ -13,5 +13,7 @@ namespace ToDoList.Api.Data
         Task<IEnumerable<TodoItem>> GetAllAsync();
         Task<Guid> CreateAsync(TodoItem todo);
         Task UpdateAsync(TodoItem todo);
+        Task<IEnumerable<TodoItem>> QueryAsync(bool? isCompleted, DateTime? createdAfterDate, DateTime? createdBeforeDate, DateTime? completedAfterDate,
+                                               DateTime? completedBeforeDate, string? titleContains, string? descriptionContains);
     }
 }

@@ -51,6 +51,29 @@ namespace ToDoList.Api.Functions
         [OpenApiResponseWithBody(HttpStatusCode.OK, "application/json", typeof(IEnumerable<TodoItem>))]
         public async Task<HttpResponseData> QueryTodoItems([HttpTrigger(AuthorizationLevel.Function, "get", Route = "todo/query")] HttpRequestData req)
         {
+            var query = System.Web.HttpUtility.ParseQueryString(req.Url.Query);
+            bool? isCompleted = !string.IsNullOrEmpty(query["isCompleted"])
+            ? bool.Parse(query["isCompleted"])
+            : null;
+
+            DateTime? createdAfterDate = !string.IsNullOrEmpty(query["createdAfterDate"])
+                ? DateTime.Parse(query["createdAfterDate"])
+                : null;
+
+            DateTime? createdBeforeDate = !string.IsNullOrEmpty(query["createdBeforeDate"])
+                ? DateTime.Parse(query["createdBeforeDate"])
+                : null;
+
+            DateTime? completedAfterDate = !string.IsNullOrEmpty(query["completedAfterDate"])
+                ? DateTime.Parse(query["completedAfterDate"])
+                : null;
+
+            DateTime? completedBeforeDate = !string.IsNullOrEmpty(query["completedBeforeDate"])
+                ? DateTime.Parse(query["completedBeforeDate"])
+                : null;
+
+            string? titleContains = query["titleContains"];
+            string? descriptionContains = query["descriptionContains"];
             throw new NotImplementedException();
         }
 
