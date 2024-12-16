@@ -24,7 +24,23 @@ namespace ToDoList.Api.Functions
         {
             _todoRepository = todoRepository;
         }
-
+        /// <summary>
+        /// Creates a new todo item.
+        /// </summary>
+        /// <param name="req">The HTTP request containing the todo item to create.</param>
+        /// <returns>
+        /// 201 Created with the newly created todo item and its location
+        /// 400 Bad Request if the request body is invalid
+        /// 500 Internal Server Error if an unexpected error occurs
+        /// </returns>
+        /// <remarks>
+        /// The request body should contain:
+        /// - title (optional): The title of the todo item
+        /// - description (optional): A detailed description of the todo item
+        /// 
+        /// CreationTime will be automatically set to the current UTC time
+        /// IsCompleted will be set to false by default
+        /// </remarks>
         [Function("CreateTodoItem")]
         [OpenApiOperation("CreateTodoItem", tags: new[] { "Todo" }, Summary = "Create a new todo item", Description = "Creates a new Todo item in the database using the information provided")]
         [OpenApiRequestBody("application/json", typeof(TodoItem))]
@@ -59,7 +75,17 @@ namespace ToDoList.Api.Functions
                 return response;
             }
         }
-
+        /// <summary>
+        /// Gets a specific todo item by its unique identifier.
+        /// </summary>
+        /// <param name="req">The HTTP request.</param>
+        /// <param name="id">The unique identifier of the todo item.</param>
+        /// <returns>
+        /// 200 OK with the todo item if found
+        /// 404 Not Found if the item doesn't exist
+        /// 400 Bad Request if the ID format is invalid
+        /// 500 Internal Server Error if an unexpected error occurs
+        /// </returns>
         [Function("GetTodoItem")]
         [OpenApiOperation("GetTodoItem", tags: new[] { "Todo" }, Summary = "Get a specific todo item", Description = "Retrieves a todo item by its unique identifier")]
         [OpenApiParameter("id", In = ParameterLocation.Path, Required = true, Type = typeof(Guid))]
@@ -95,7 +121,11 @@ namespace ToDoList.Api.Functions
                 return response;
             }
         }
-
+        /// <summary>
+        /// Gets all todo items without any filtering.
+        /// </summary>
+        /// <param name="req">The HTTP request.</param>
+        /// <returns>200 OK with a list of all todo items</returns>
         [Function("GetAllTodoItems")]
         [OpenApiOperation("GetAllTodoItems", tags: new[] { "Todo" }, Summary = "Get all todo items", Description = "Retrieves all todo items in the database")]
         [OpenApiResponseWithBody(HttpStatusCode.OK, "application/json", typeof(IEnumerable<TodoItem>))]
@@ -117,7 +147,21 @@ namespace ToDoList.Api.Functions
                 return response;
             }
         }
-
+        /// <summary>
+        /// Queries todo items using various filter criteria.
+        /// </summary>
+        /// <param name="req">The HTTP request.</param>
+        /// <returns>200 OK with the filtered list of todo items</returns>
+        /// <remarks>
+        /// Supported query parameters:
+        /// - isCompleted: Filter by completion status
+        /// - createdAfterDate: Filter items created after this date
+        /// - createdBeforeDate: Filter items created before this date
+        /// - completedAfterDate: Filter items completed after this date
+        /// - completedBeforeDate: Filter items completed before this date
+        /// - titleContains: Filter items where title contains this text
+        /// - descriptionContains: Filter items where description contains this text
+        /// </remarks>
         [Function("QueryTodoItems")]
         [OpenApiOperation("QueryTodoItems", tags: new[] { "Todo" }, Summary = "Query the database for a filtered list of Todo Items", Description = "Retrieves a list of all Todo items filtered by provided parameters")]
         [OpenApiParameter("isCompleted", In = ParameterLocation.Query, Required = false, Type = typeof(bool?))]
@@ -185,7 +229,17 @@ namespace ToDoList.Api.Functions
                 return response;
             }
         }
-
+        /// <summary>
+        /// Updates an existing todo item.
+        /// </summary>
+        /// <param name="req">The HTTP request containing the updated todo item.</param>
+        /// <param name="id">The unique identifier of the todo item to update.</param>
+        /// <returns>
+        /// 200 OK with the updated todo item if successful
+        /// 404 Not Found if the item doesn't exist
+        /// 400 Bad Request if the ID format is invalid or request body is invalid
+        /// 500 Internal Server Error if an unexpected error occurs
+        /// </returns>
         [Function("UpdateTodoItem")]
         [OpenApiOperation("UpdateTodoItem", tags: new[] { "Todo" }, Summary = "Update a Todo item", Description = "Updates a specified Todo item with provided values")]
         [OpenApiParameter("id", In = ParameterLocation.Path, Required = true, Type = typeof(Guid))]
