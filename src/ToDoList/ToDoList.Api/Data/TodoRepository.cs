@@ -1,4 +1,7 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using Dapper;
+using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,36 +13,78 @@ namespace ToDoList.Api.Data
 {
     public class TodoRepository : ITodoRepository
     {
-        private string _connectionString;
+        private readonly TodoDbContext _context;
 
-        public TodoRepository(IConfiguration configuration)
+        public TodoRepository(IConfiguration configuration, TodoDbContext context)
         {
-            _connectionString = configuration.GetConnectionString("TodoConnectionString")
-                ?? throw new ArgumentNullException("Database Connection string is missing");
+            _context = context;
         }
-        public Task<Guid> CreateAsync(TodoItem todo)
+        public async Task<Guid> CreateAsync(TodoItem todo)
         {
-            throw new NotImplementedException();
-        }
+            todo.Id = Guid.NewGuid();
+            todo.CreationTime = DateTime.UtcNow;
+            todo.IsCompleted = false;
+            todo.CompletionTime = null;
 
-        public Task<IEnumerable<TodoItem>> GetAllAsync()
-        {
-            throw new NotImplementedException();
-        }
+            await _context.TodoItems.AddAsync(todo);
+            await _context.SaveChangesAsync();
 
-        public Task<TodoItem> GetByIdAsync(Guid id)
-        {
-            throw new NotImplementedException();
+            return todo.Id;
         }
 
-        public Task<IEnumerable<TodoItem>> QueryAsync(bool? isCompleted, DateTime? createdAfterDate, DateTime? createdBeforeDate, DateTime? completedAfterDate, DateTime? completedBeforeDate, string titleContains, string descriptionContains)
+        public async Task<IEnumerable<TodoItem>> GetAllAsync()
         {
-            throw new NotImplementedException();
+            return await _context.TodoItems
+                .OrderByDescending(t => t.CreationTime)
+                .ToListAsync();
         }
 
-        public Task UpdateAsync(TodoItem todo)
+        public async Task<TodoItem> GetByIdAsync(Guid id)
         {
-            throw new NotImplementedException();
+            return await _context.TodoItems.FindAsync(id);
         }
+
+        public async Task<IEnumerable<TodoItem>> QueryAsync(bool? isCompleted, DateTime? createdAfterDate, DateTime? createdBeforeDate, DateTime? completedAfterDate, DateTime? completedBeforeDate, string titleContains, string descriptionContains)
+        {
+            var query = _context.TodoItems.AsQueryable();
+
+            if (isCompleted.HasValue)
+                query = query.Where(t => t.IsCompleted == isCompleted.Value);
+
+            if (createdAfterDate.HasValue)
+                query = query.Where(t => t.CreationTime >= createdAfterDate.Value);
+
+            if (createdBeforeDate.HasValue)
+                query = query.Where(t => t.CreationTime <= createdBeforeDate.Value);
+
+            if (completedAfterDate.HasValue)
+                query = query.Where(t => t.CompletionTime >= completedAfterDate.Value);
+
+            if (completedBeforeDate.HasValue)
+                query = query.Where(t => t.CompletionTime <= completedBeforeDate.Value);
+
+            if (!string.IsNullOrEmpty(titleContains))
+                query = query.Where(t => t.Title.Contains(titleContains));
+
+            if (!string.IsNullOrEmpty(descriptionContains))
+                query = query.Where(t => t.Description.Contains(descriptionContains));
+
+            return await query
+                .OrderByDescending(t => t.CreationTime)
+                .ToListAsync();
+        }
+
+        public async Task UpdateAsync(TodoItem todo)
+        {
+            var existing = await _context.TodoItems.FindAsync(todo.Id)
+                ?? throw new KeyNotFoundException($"Todo item with ID {todo.Id} not found");
+
+            existing.Title = todo.Title;
+            existing.Description = todo.Description;
+            existing.IsCompleted = todo.IsCompleted;
+            existing.CompletionTime = todo.CompletionTime;
+
+            await _context.SaveChangesAsync();
+        }    
     }
 }
