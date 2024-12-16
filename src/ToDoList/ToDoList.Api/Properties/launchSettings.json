@@ -2,7 +2,7 @@
   "profiles": {
     "ToDoList.Api": {
       "commandName": "Project",
-      "commandLineArgs": "--port 7197",
+      "commandLineArgs": "--port 7047",
       "launchBrowser": false
     }
   }
